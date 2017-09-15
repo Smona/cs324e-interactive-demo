@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>CS324E Interactive Demo | Mason Bourgeois</title>
+    <script preload src="https://github.com/photonstorm/phaser-ce/releases/download/v2.8.6/phaser.min.js"></script>
+    <style>
+      html {
+        overflow: hidden;
+        height: 100vh;
+      }
+      * {
+        margin: 0;
+      }
+      body {
+        background-color: #111;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    </style>
+  </head>
+  <body>
+    <script>
+      var width = window.innerWidth, height = window.innerHeight;;
+      var game = new Phaser.Game(width, height, Phaser.AUTO);
+      var hydra, marines, scoreText, score = 0;
+
+      game.state.add('level', {
+        preload: function () {
+          game.load.image('hydralisk', '/sprites/hydralisk.png');
+          game.load.image('marine', '/sprites/marine.png');
+        },
+        create: function () {
+          game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+          game.physics.startSystem(Phaser.Physics.ARCADE);
+          game.world.setBounds(0, 0, width, height);
+          hydra = game.add.sprite(game.world.centerX, game.world.centerY, 'hydralisk');
+          hydra.anchor.setTo(0.5, 0.5);
+          game.physics.arcade.enable(hydra);
+          hydra.body.collideWorldBounds = true;
+
+          marines = game.add.group();
+          marines.enableBody = true;
+          for (var i = 0; i < 10; i++) {
+            var marine = marines.create(game.rnd.between(10, width - 10), game.rnd.between(10, height - 10), 'marine');
+            marine.anchor.setTo(0.5, 0.5);
+          }
+
+          scoreText = game.add.text(0, 0, "Score: " + score, { font: '50px monospace', fill: 'yellow' });
+        },
+        update: function () {
+          game.physics.arcade.overlap(hydra, marines, killMarine, null, this);
+          var speed = 3;
+          if (game.input.keyboard.isDown(Phaser.Keyboard.RIGHT)) {
+            hydra.x += speed;
+            hydra.scale.setTo(1, 1);
+          } else if (game.input.keyboard.isDown(Phaser.Keyboard.LEFT)) {
+            hydra.x -= speed;
+            hydra.scale.setTo(-1, 1);
+          }
+          if (game.input.keyboard.isDown(Phaser.Keyboard.UP)) {
+            hydra.y -= speed;
+          } else if (game.input.keyboard.isDown(Phaser.Keyboard.DOWN)) {
+            hydra.y += speed;
+          }
+        }
+      });
+      function killMarine(hydra, marine) {
+        marine.kill();
+        score++;
+        scoreText.text = 'Score: ' + score;
+      }
+
+      game.state.start('level');
+    </script>
+  </body>
+</html>
