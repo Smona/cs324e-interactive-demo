@@ -23,6 +23,7 @@
       var width = window.innerWidth, height = window.innerHeight;;
       var game = new Phaser.Game(width, height, Phaser.AUTO);
       var hydra, marines, scoreText, score = 0;
+      var style = { font: '50px monospace', fill: 'yellow' };
 
       game.state.add('level', {
         preload: function () {
@@ -45,7 +46,7 @@
             marine.anchor.setTo(0.5, 0.5);
           }
 
-          scoreText = game.add.text(0, 0, "Score: " + score, { font: '50px monospace', fill: 'yellow' });
+          scoreText = game.add.text(0, 0, "Score: " + score, style);
         },
         update: function () {
           game.physics.arcade.overlap(hydra, marines, killMarine, null, this);
@@ -68,7 +69,23 @@
         marine.kill();
         score++;
         scoreText.text = 'Score: ' + score;
+        if (score >= 10) {
+          game.state.start('victory');
+        }
       }
+
+      game.state.add('victory', {
+        create: function () {
+          var vicText = game.add.text(game.world.centerX, game.world.centerY, 'VICTORY!!', style)
+          vicText.anchor.setTo(0.5, 0.5);
+
+          hydra = game.add.sprite(game.world.centerX, game.world.centerY + 100, 'hydralisk');
+          hydra.anchor.setTo(0.5, 0.5);
+        },
+        update: function () {
+          hydra.angle += 1;
+        }
+      });
 
       game.state.start('level');
     </script>
